@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 12pt;
+    color: #000000;
+    margin: 0;
+    padding: 0;
+  }
+  p {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 12pt;
+    line-height: 1.7;
+    text-indent: 2em;
+    margin: 6pt 0;
+  }
+  h1 {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 16pt;
+    font-weight: bold;
+    text-indent: 0;
+    margin: 16pt 0 8pt 0;
+    padding-bottom: 4pt;
+    border-bottom: 1.5pt solid #1f4e79;
+    color: #1f4e79;
+  }
+  h2 {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 13.5pt;
+    font-weight: bold;
+    text-indent: 0;
+    margin: 12pt 0 6pt 0;
+    color: #2e5e8c;
+  }
+  h3 {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 12.5pt;
+    font-weight: bold;
+    text-indent: 0;
+    margin: 10pt 0 4pt 0;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 8pt 0 12pt 0;
+    font-size: 11pt;
+  }
+  th, td {
+    border: 1px solid #888888;
+    padding: 5pt 7pt;
+    text-indent: 0;
+    vertical-align: top;
+  }
+  th {
+    background-color: #1f4e79;
+    color: #ffffff;
+    font-weight: bold;
+    text-align: left;
+  }
+  tr:nth-child(even) td { background-color: #f2f6fb; }
+  .doc-title {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 22pt;
+    font-weight: bold;
+    text-align: center;
+    text-indent: 0;
+    margin: 40pt 0 10pt 0;
+  }
+  .doc-subtitle {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 16pt;
+    font-weight: bold;
+    text-align: center;
+    text-indent: 0;
+    margin: 6pt 0;
+  }
+  .doc-subtitle2 {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 14pt;
+    font-weight: bold;
+    text-align: center;
+    text-indent: 0;
+    margin: 6pt 0;
+    color: #2e5e8c;
+  }
+  .doc-meta {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 11pt;
+    text-align: center;
+    text-indent: 0;
+    margin: 4pt 0;
+    color: #444444;
+  }
+  .toc-title {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 15pt;
+    font-weight: bold;
+    text-align: center;
+    text-indent: 0;
+    margin: 14pt 0 10pt 0;
+  }
+  .toc-list, .toc-list ol, .toc-list ul { list-style: none; }
+  .toc-list li {
+    font-family: "SimSun", "宋体", serif;
+    font-size: 12pt;
+    text-indent: 0;
+    margin: 6pt 0;
+  }
+  .toc-list ol { padding-left: 2em; }
+  code {
+    font-family: "Courier New", monospace;
+    font-size: 10.5pt;
+    background-color: #f0f0f0;
+    padding: 0 3pt;
+  }
+</style>
+</head>
+<body>
+
+<section role="cover">
+  <p class="doc-title">项目技术文档 · 求职作品集</p>
+  <p class="doc-subtitle">医院运维工单系统</p>
+  <p class="doc-subtitle2">技术栈与架构汇总</p>
+  <p class="doc-subtitle2">纯网页全栈工单管理系统（FastAPI + MySQL + 原生前端 + 千问大模型）</p>
+  <p class="doc-meta">编制日期：2026 年 11 月</p>
+  <p class="doc-meta">用途：技术选型与架构能力梳理，用于求职面试展示</p>
+</section>
+
+<section role="cover">
+  <nav class="doc-toc" aria-label="文档目录">
+    <p class="toc-title">目录</p>
+    <ol class="toc-list">
+      <li><a href="#section-1">一、项目定位</a></li>
+      <li><a href="#section-2">二、技术栈总览（分层）</a></li>
+      <li><a href="#section-3">三、各端技术细节</a>
+        <ol>
+          <li><a href="#section-3-1">1. 后端（Server / Backend）</a></li>
+          <li><a href="#section-3-2">2. 前端（Web Frontend）</a></li>
+          <li><a href="#section-3-3">3. 数据层（Data / Persistence）</a></li>
+          <li><a href="#section-3-4">4. AI 集成（大模型应用）</a></li>
+          <li><a href="#section-3-5">5. 工程化与运行（Tooling / DevOps）</a></li>
+        </ol>
+      </li>
+      <li><a href="#section-4">四、架构亮点（可用于面试阐述）</a></li>
+      <li><a href="#section-5">五、项目目录结构</a></li>
+      <li><a href="#section-6">六、可迁移能力总结</a></li>
+    </ol>
+  </nav>
+</section>
+
+<section class="chapter" data-page-restart="1">
+
+  <h1 id="section-1">一、项目定位</h1>
+  <p>一套纯网页运行的医院 IT 运维工单管理系统，面向「管理员 / 主管 / 工程师」三角色协作。核心覆盖：工单全生命周期管理（电脑 / 打印机 / PDA 三类故障）、24 小时超时统计、经验标签沉淀复用、AI 员工评估（SSE 流式输出）、RAG 故障经验检索，以及 24 小时在岗排班。技术上以「轻量可移植 + 生产可部署（ASGI + MySQL 事务型存储）」为核心设计原则：后端采用现代异步框架 FastAPI，数据层采用生产级 MySQL，前端仍为零框架原生实现，整套可由内嵌绿色 Python 一键启动，也易于容器化部署，适合作为全栈能力与工程实践的展示样例。</p>
+
+  <h1 id="section-2">二、技术栈总览（分层）</h1>
+  <table>
+    <thead>
+      <tr><th>层级</th><th>技术 / 框架</th><th>选型要点</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>后端框架</td><td>FastAPI（Python，ASGI）</td><td>现代异步 Web 框架，路由 + 依赖注入（Depends）+ 数据校验一体</td></tr>
+      <tr><td>模板引擎</td><td>Jinja2（Starlette Jinja2Templates）</td><td>服务端渲染（SSR），无前后端分离</td></tr>
+      <tr><td>前端样式</td><td>原生 HTML5 + CSS3</td><td>手写设计系统（CSS 变量 + Flexbox + Grid），无 UI 框架</td></tr>
+      <tr><td>前端图表</td><td>原生 SVG</td><td>仪表盘柱状 / 条形图，零依赖、免联网</td></tr>
+      <tr><td>数据存储</td><td>MySQL（SQLAlchemy ORM + PyMySQL 驱动）</td><td>事务型关系数据库，生产级并发与一致性，UTF8MB4</td></tr>
+      <tr><td>密码安全</td><td>Werkzeug Security</td><td>pbkdf2:sha256 哈希，不存明文密码</td></tr>
+      <tr><td>AI 能力</td><td>通义千问（DashScope）OpenAI 兼容 API + text-embedding-v3</td><td>员工评估（支持 SSE 流式输出）、RAG 故障经验检索，默认 qwen-plus，支持模型回退</td></tr>
+      <tr><td>向量检索</td><td>text-embedding-v3 + 余弦相似度（纯 Python）</td><td>历史工单向量化，应用内召回 Top-K，无需外部向量库</td></tr>
+      <tr><td>流式传输</td><td>SSE（text/event-stream）</td><td>员工评估逐 token 推送，前端 EventSource 逐字显示</td></tr>
+      <tr><td>并发桥接</td><td>Thread + asyncio.Queue</td><td>同步 urllib 流式生成不阻塞 ASGI 事件循环</td></tr>
+      <tr><td>HTTP 客户端</td><td>Python 标准库 urllib</td><td>直连大模型接口，不引入第三方 HTTP 库</td></tr>
+      <tr><td>配置管理</td><td>.env + os.environ</td><td>API Key 外置，杜绝硬编码</td></tr>
+      <tr><td>包管理</td><td>uv（pyproject.toml + uv.lock）</td><td>依赖声明与版本锁定分离，dev 依赖独立分组；uv sync --frozen 保证本机与镜像装出同一套版本</td></tr>
+      <tr><td>运行环境</td><td>内嵌绿色版 Python</td><td>免装环境，一键启动（uvicorn main:app）</td></tr>
+      <tr><td>容器化部署</td><td>Docker + Docker Compose</td><td>应用镜像 python:3.13-slim、数据库 mysql:8.0；健康检查驱动启动顺序，数据卷持久化</td></tr>
+    </tbody>
+  </table>
+
+  <h1 id="section-3">三、各端技术细节</h1>
+
+  <h2 id="section-3-1">1. 后端（Server / Backend）</h2>
+  <p><b>FastAPI 路由与视图：</b>所有页面与接口由 <code>main.py</code> 中的异步函数承载，使用 <code>@app.get</code> / <code>@app.post</code> / <code>@app.api_route</code> 声明路由，依赖注入（<code>dependencies=[Depends(...)]</code>）统一挂载鉴权与数据库会话，<code>TemplateResponse</code> 完成服务端渲染，<code>RedirectResponse</code> / <code>url_for</code> 处理跳转。</p>
+  <p><b>会话与鉴权（RBAC）：</b>基于 Starlette <code>SessionMiddleware</code> 维护登录态；自研 <code>login_required</code> / <code>role_required</code> 依赖（<code>Depends</code>）做统一拦截，越权时通过异常处理器（<code>AuthRedirect</code>）统一返回 302 跳转；角色分三级——admin（管理员，含全部后台权限）、supervisor（主管，可下派工单与评估）、engineer（工程师，处理工单）。权限判断贯穿导航渲染与接口层。</p>
+  <p><b>业务与数据分离：</b><code>main.py</code> 只负责路由、权限、业务逻辑；ORM 模型独立为 <code>models.py</code>，数据库引擎 / 会话独立为 <code>database.py</code>，模板 / 闪现 / 鉴权辅助独立为 <code>web.py</code>，演示数据独立为 <code>seed_data.py</code>，排班算法独立为 <code>schedules.py</code>，配置独立为 <code>config.py</code>，职责清晰、便于维护。</p>
+  <p><b>数据库自动迁移：</b><code>Base.metadata.create_all</code> 按 ORM 模型建表；MySQL 场景下启动时自动 <code>CREATE DATABASE</code>（需连接账号具备建库权限），保证代码升级后库表自动就绪。</p>
+  <p><b>密码哈希：</b>建账号时使用 <code>werkzeug.security.generate_password_hash</code>（默认 pbkdf2:sha256），登录时 <code>check_password_hash</code> 校验，全库不存明文。</p>
+  <p><b>大模型调用：</b><code>call_qwen()</code> 用标准库 <code>urllib.request</code> 直接 POST 到 DashScope 的 OpenAI 兼容端点，未引入 openai SDK，减少依赖体积；支持模型自动回退。<code>call_qwen_stream()</code> 以 stream=true 逐行解析 SSE 增量，供员工评估流式输出；<code>call_embedding()</code> 调用 text-embedding-v3 完成历史工单向量化。</p>
+
+  <h2 id="section-3-2">2. 前端（Web Frontend）</h2>
+  <p><b>模板引擎 Jinja2：</b>页面均位于 <code>templates/</code>，以 <code>base.html</code> 为布局母板（侧边栏 + 顶栏 + 内容区），各页面通过 <code>{% block %}</code> 继承复用；渲染由 Starlette 的 <code>Jinja2Templates</code> 完成，并通过 <code>web.py</code> 注入 <code>url_for</code> / <code>get_flashed_messages</code> / <code>g</code> / <code>endpoint</code> 复刻 Flask 上下文，保持 UI 一致。</p>
+  <p><b>手写 CSS 设计系统：</b><code>base.html</code> 内定义一套以 CSS 变量（<code>--primary</code>、<code>--surface</code>、<code>--badge.*</code> 等）驱动的视觉规范，使用 Flexbox 与 CSS Grid 完成卡片、表格、统计卡等布局；无任何第三方 UI 框架（如 Bootstrap / Tailwind）。</p>
+  <p><b>原生 SVG 图表：</b>「工单情况」页的近 14 天工单量、超时量、类型分布等图表由服务端生成内联 SVG，不依赖 ECharts / Chart.js 等库，断网可用。</p>
+  <p><b>轻量交互：</b>交互以原生表单提交、少量原生 JS 与点击芯片快速填充标签为主；无前端框架（React / Vue）、无打包构建步骤（Vite / Webpack），降低复杂度。</p>
+  <p><b>响应式：</b>通过 CSS 媒体查询在窄屏下隐藏侧边栏、压缩统计卡列数。</p>
+
+  <h2 id="section-3-3">3. 数据层（Data / Persistence）</h2>
+  <p><b>MySQL 关系数据库：</b>数据落在由 <code>DATABASE_URL</code> 指定的 MySQL 库（<code>mysql+pymysql://...</code>，UTF8MB4），具备事务、并发与一致性保障；需要安装数据库服务或使用云数据库，备份通过 <code>mysqldump</code> / 云快照完成。</p>
+  <p><b>核心表设计：</b>users（含角色、分组、特殊岗位标记）、groups、departments、work_orders（含状态、报障 / 故障 / 解决字段、满意度、时间戳）、workorder_tags（故障原因 / 解决方法复用标签）、evaluations（AI 评估缓存）、workorder_knowledge（RAG 历史工单向量库）、schedules（排班）——均由 SQLAlchemy ORM 模型（<code>models.py</code>）定义，全部 SQL 走参数化查询防注入。</p>
+  <p><b>演示数据外置：</b>50 条工单、17 名工程师、3 分组、14 科室等测试数据由 <code>seed_data.py</code> 写入数据库，而非硬编码在业务源码中，符合「数据即配置」的实践。</p>
+  <p><b>标签沉淀：</b>工程师完成工单时填写的「故障原因 / 解决方法」自动入库为可复用标签，后续可一键回填，体现数据闭环设计。</p>
+
+  <h2 id="section-3-4">4. AI 集成（大模型应用）</h2>
+  <p><b>通义千问 OpenAI 兼容接口：</b>通过 .env 中的 <code>DASHSCOPE_BASE_URL</code>（兼容模式 /compatible-mode/v1）对接 DashScope（或私有 MaaS 部署），模型默认 qwen-plus（低成本可用），可在 .env 用 <code>QWEN_MODEL</code> 覆盖。</p>
+  <p><b>业务落地：</b>主管 / 管理员进入「员工评估」模块，系统汇总某工程师的已完结工单（数量、平均处理时长、超时数、满意度），调用大模型生成工作表现总结（时效、积极性、改进建议）。详情页支持 SSE 流式输出，前端逐字显示生成过程，完成后自动落库。</p>
+  <p><b>RAG 故障经验检索：</b>管理员把「已完成且填写故障原因 / 解决方法」的历史工单用 text-embedding-v3 向量化写入 <code>workorder_knowledge</code> 表；工程师输入新故障描述后，系统在应用内做余弦相似度召回 Top-3 工单，再交给千问生成针对性建议。无需外部向量数据库，百~千级数据量下性价比最高。</p>
+  <p><b>安全与成本：</b>API Key 经 <code>os.environ</code> 读取，绝不出现在源码；评估结果写入 <code>evaluations</code> 表缓存，可「重新生成」，避免重复消耗 token。</p>
+
+  <h3>4.1 本次新增技术细节：RAG 与 SSE 流式输出</h3>
+  <p><b>离线索引（RAG Indexing）：</b>只索引「已完成 + 有故障原因 + 有解决方法」的工单，把「类型 / 科室 / 报障内容 / 原因 / 解决方法」拼成一段文本，调用 text-embedding-v3 生成向量，以 JSON 字符串存入 <code>workorder_knowledge.embedding</code>（MySQL TEXT），不引入向量数据库，避免额外运维成本。</p>
+  <p><b>在线检索（Retrieval）：</b>工程师输入新故障描述后先向量化，再与应用内全部工单向量做余弦相似度计算，召回 Top-3；余弦相似度用纯 Python 实现（不依赖 numpy），百~千级数据量下为毫秒级。</p>
+  <p><b>生成增强（Generation）：</b>把 Top-3 历史工单作为上下文拼入 prompt，调用 qwen-plus 生成不超过 300 字的排查与解决建议；同时把相似度、故障原因、解决方法原样返回前端，避免「黑盒」结论。</p>
+  <p><b>SSE 流式链路：</b><code>call_qwen_stream()</code> 以 stream=true 请求模型，逐行解析 <code>data:</code> 增量；服务端用 <code>StreamingResponse</code> 输出 <code>text/event-stream</code>；由于 urllib 为同步阻塞，实际生成放在后台线程，经 <code>asyncio.Queue</code> 把 token 回传事件循环，避免阻塞其它请求；前端用 <code>EventSource</code> 监听 token / done / error 事件实现逐字显示。</p>
+  <p><b>结果一致性：</b>流式结束后统一做「空内容 / 超 500 字」校验，并用独立 <code>SessionLocal</code> 落库 <code>evaluations</code>，保证与原有非流式接口同一口径、同样可缓存复用。</p>
+  <p><b>成本与稳健性：</b>索引按 20 条分批 commit 的批量重建；日常每次提问仅 1 次 query embedding + 1 次对话调用；embedding 端点支持 <code>EMBEDDING_BASE_URL</code> → <code>DASHSCOPE_BASE_URL</code> 自动回退，兼容「私有 MaaS 网关 + 公共 DashScope」混合部署。</p>
+
+  <h2 id="section-3-5">5. 工程化与运行（Tooling / DevOps）</h2>
+  <p><b>依赖清晰：</b>uv 管理依赖——<code>pyproject.toml</code> 的 <code>[project.dependencies]</code> 声明 fastapi / uvicorn / sqlalchemy / pymysql / cryptography / itsdangerous / python-dotenv / python-multipart / werkzeug / jinja2，pytest 独立放在 <code>[dependency-groups].dev</code>；<code>uv.lock</code> 锁定精确版本与哈希，<code>uv sync</code> 一键还原环境、<code>uv run</code> 直接在项目虚拟环境内执行。</p>
+  <p><b>内嵌绿色 Python：</b>项目自带 <code>python/</code> 目录的免安装 Python（含 pip 与依赖），配合 <code>run.bat</code>（Windows）/ <code>run.sh</code>（Linux / macOS）以 <code>uvicorn main:app</code> 一键启动，摆脱环境问题。</p>
+  <p><b>排班算法：</b><code>schedules.py</code> 以约束求解方式生成排班——保证每日 24 小时在岗、工作日白班 2 人 / 夜班 1 人、非工作日白班 1 人 / 夜班 1 人、夜班次日休息、单周工时 ≤ 48 小时标红，并按分组均衡分配，结果写入 <code>schedules</code> 表（SQLAlchemy 参数化查询）。</p>
+  <p><b>密钥外置：</b>.env 管理 AI 密钥与可切换模型，运行期注入环境变量。</p>
+
+  <h3>5.1 本次新增技术：Docker 容器化部署</h3>
+  <p><b>镜像构建：</b>单阶段 <code>Dockerfile</code>，基础镜像 <code>python:3.13-slim</code>；先 <code>pip install --no-cache-dir uv</code> 安装 uv，再 COPY <code>pyproject.toml uv.lock</code> 并执行 <code>uv sync --frozen --no-dev</code>（只装运行时依赖），最后 <code>COPY . .</code> 并通过 <code>ENV PATH="/app/.venv/bin:$PATH"</code> 指向虚拟环境内的 uvicorn；依赖层与代码层分离，业务代码变更不会触发重新装依赖；不采用多阶段构建，保持简单可读。</p>
+  <p><b>构建上下文瘦身：</b><code>.dockerignore</code> 排除 <code>.env</code>（密钥绝不进镜像）、<code>*.db</code>、<code>python/</code>（内置绿色 Python，镜像内用官方解释器）、<code>tests/</code>、<code>README.md</code>、<code>.git/</code>、<code>__pycache__/</code>、<code>.pytest_cache/</code>、<code>.venv/</code>，缩小传输体积并避免本地状态污染镜像。</p>
+  <p><b>服务编排：</b><code>docker-compose.yml</code> 定义 db（<code>mysql:8.0</code>，utf8mb4 / utf8mb4_unicode_ci 与应用建库语句一致，<code>mysql_data</code> 数据卷持久化，<code>mysqladmin ping</code> 健康检查 interval 5s / start_period 60s）与 app（build .、5000:5000、restart: unless-stopped）两个服务；app 用 depends_on 长格式 <code>condition: service_healthy</code>，确保 MySQL 真正可接受连接后才启动，避免「端口已监听但仍在初始化」导致的首次连接失败。</p>
+  <p><b>配置注入（12-Factor）：</b>DATABASE_URL / SECRET_KEY / DASHSCOPE_API_KEY / QWEN_MODEL / EMBEDDING_MODEL 等全部由 compose 环境变量注入，其中 DATABASE_URL 指向容器内服务名 <code>db</code>；本地直接 uvicorn 运行时仍走 <code>config.py</code> 的 127.0.0.1 默认值，两种运行方式互不干扰。</p>
+  <p><b>连接池调优：</b><code>create_engine</code> 显式 <code>pool_pre_ping=True</code>、<code>pool_size=10</code>、<code>max_overflow=20</code>，避免容器内「多并发请求 + SSE 流式任务」同时占用连接耗尽默认池（5 + 10）；文件型 SQLite 同样使用 QueuePool，接受这些参数，本地冒烟行为不变。</p>
+  <p><b>单 worker 约束：</b>SSE 流式的生成任务经线程回调「本进程」的事件循环，镜像 CMD 固定单 worker；若要扩多 worker，必须在反向代理层做会话粘性，否则同一会话的请求与流式任务会落到不同进程。</p>
+  <p><b>认证依赖补齐：</b>MySQL 8 默认认证插件 caching_sha2_password 在非 TLS 的 TCP 连接上首次认证需 RSA 公钥加密，PyMySQL 依赖 <code>cryptography</code> 包，已在 <code>pyproject.toml</code> 显式声明，避免容器内首次连接即报错。</p>
+
+  <h3>5.2 依赖管理迁移：由 requirements.txt 切换为 uv</h3>
+  <p><b>项目元数据：</b><code>uv init</code> 生成 <code>pyproject.toml</code>——name = ticket-system、version = 0.1.0、description、readme = README.md、requires-python = "&gt;=3.13"；作为「应用」而非可分发包，不声明 build-system，<code>uv sync</code> 只安装依赖、不构建项目自身。</p>
+  <p><b>依赖分层：</b><code>[project.dependencies]</code> 只放运行时依赖（含 cryptography 与 itsdangerous）；pytest 放入 <code>[dependency-groups].dev</code>（PEP 735 依赖组），生产 / 镜像用 <code>uv sync --no-dev</code> 直接跳过，避免测试依赖进入运行环境。</p>
+  <p><b>锁定与复现：</b><code>uv.lock</code> 记录每个包的精确版本、下载地址与哈希，<code>uv sync --frozen</code> 严格按锁文件安装、不做二次解析；本机、CI 与镜像三处环境完全一致，杜绝「本机能跑、容器报错」。</p>
+  <p><b>迁移方式：</b><code>uv add -r requirements.txt</code> 批量导入原有依赖，随后 <code>uv remove pytest</code> + <code>uv add --dev pytest</code> 完成主依赖与开发依赖的拆层；迁移完成后删除 requirements.txt，避免两套依赖清单并存造成漂移。</p>
+  <p><b>真实收益：</b>迁移后用锁文件版本（fastapi 0.162 / starlette 1.10 / sqlalchemy 2.1.6）起服务做冒烟，暴露出 starlette 的 <code>SessionMiddleware</code> 依赖 <code>itsdangerous</code>，而原 requirements.txt 从未声明它（此前只是靠 Flask 时代遗留的间接安装才没报错）——已在 pyproject.toml 补声明，属于「锁定依赖后才会暴露的隐性缺失」。</p>
+
+  <h1 id="section-4">四、架构亮点（可用于面试阐述）</h1>
+  <p><b>生产级可部署 + 零外部服务依赖并存：</b>后端 FastAPI（ASGI）具备高并发能力，数据层 MySQL 提供事务型存储，可单机部署也可容器化；同时保留 SQLite 作为本地冒烟 / 演示的可选项，整套仍可由内嵌 Python 一键启动，体现可移植性。</p>
+  <p><b>关注点分离：</b>main.py（路由 / 权限 / 业务）、models.py（ORM）、database.py（引擎会话）、web.py（模板·闪现·鉴权）、schedules.py（算法）、seed_data.py（数据）、config.py（配置）解耦，模块边界清晰，利于测试与演进。</p>
+  <p><b>安全实践落地：</b>密码哈希、API Key 外置、基于依赖注入的 RBAC 拦截、全部 SQL 走 SQLAlchemy 参数化（防注入），并非玩具项目。</p>
+  <p><b>AI 解决真实业务问题：</b>将大模型用于「员工评估」这类非结构化总结任务，并配套结果缓存与成本意识；进一步以 RAG 把历史工单经验转化为可检索的解决建议，展示 AI 工程化应用能力。</p>
+  <p><b>RAG 与流式工程化：</b>用「MySQL 存向量 + 应用内余弦召回」替代向量数据库，控制部署复杂度；用「后台线程 + asyncio.Queue + SSE」把同步阻塞的大模型调用安全地接入 ASGI 流式响应，兼顾实时体验与并发安全。</p>
+  <p><b>约束求解能力：</b>排班模块把人力规则转化为可计算约束并自动均衡，展示算法建模与工程实现能力。</p>
+  <p><b>容器化交付：</b>单阶段 Dockerfile + compose 双服务，健康检查驱动启动顺序、数据卷持久化、密钥全部环境变量注入，一条 <code>docker compose up --build</code> 即可复现整套环境；同时保留内嵌 Python 一键启动路径，兼顾「可复现部署」与「零环境演示」。</p>
+
+  <h1 id="section-5">五、项目目录结构</h1>
+  <p>工单系统 /</p>
+  <p>├── main.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 主程序：FastAPI 路由 / 依赖注入鉴权 / 业务逻辑</p>
+  <p>├── config.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 配置中心（DATABASE_URL / SECRET_KEY / 千问模型，读 .env）</p>
+  <p>├── database.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 引擎 / 会话 / 声明基类（含 MySQL 自动建库）</p>
+  <p>├── models.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# SQLAlchemy ORM 模型（8 张表，含 RAG 知识库表）</p>
+  <p>├── web.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 模板渲染 / 闪现消息 / 鉴权依赖 / 异常跳转</p>
+  <p>├── schedules.py&nbsp;&nbsp;&nbsp;&nbsp;# 排班算法（约束求解，SQLAlchemy 参数化）</p>
+  <p>├── seed_data.py&nbsp;&nbsp;&nbsp;&nbsp;# 演示数据（写入数据库，非硬编码）</p>
+  <p>├── tests/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 单元测试（pytest：核心纯函数 + RAG 检索 + SSE 帧）</p>
+  <p>├── pyproject.toml&nbsp;&nbsp;# 项目与依赖声明（uv：[project.dependencies] + dev 组）</p>
+  <p>├── uv.lock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 依赖锁文件（精确版本与哈希，保证环境可复现）</p>
+  <p>├── Dockerfile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 应用镜像（python:3.13-slim，单 worker，SSE 兼容）</p>
+  <p>├── docker-compose.yml&nbsp;# app + mysql:8.0 编排（健康检查驱动启动顺序 / 数据卷）</p>
+  <p>├── .dockerignore&nbsp;&nbsp;&nbsp;&nbsp;# 排除 .env、*.db、python/ 等，密钥与本地文件不进镜像</p>
+  <p>├── .env&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 数据库连接 / AI 密钥（不入库）</p>
+  <p>├── python/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 内嵌绿色版 Python（免装即用）</p>
+  <p>├── run.bat / run.sh&nbsp;# 一键启动（uvicorn main:app）</p>
+  <p>├── templates/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Jinja2 页面模板（base.html 为母板）</p>
+  <p>└── static/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# 静态资源</p>
+
+  <h1 id="section-6">六、可迁移能力总结</h1>
+  <p>通过本项目可展示的能力栈：Python 全栈开发（FastAPI + Jinja2 SSR + ASGI）、关系型数据建模与 MySQL / SQLAlchemy ORM 实战、基于依赖注入的 RBAC 权限系统设计、原生前端（HTML / CSS / SVG）实现能力、大模型 API 集成与工程化处理（密钥管理 / 结果缓存 / 模型回退 / RAG 检索增强 / 向量化与余弦召回 / SSE 流式输出与同步异步桥接 / 成本控制）、Docker 容器化交付（镜像分层缓存 / 编排与健康检查 / 配置注入 / 连接池调优）、uv 依赖管理（声明与锁定分离 / dev 依赖分组 / --frozen 可复现安装）、约束求解类算法落地，以及生产级可部署交付与零依赖可移植交付的双重工程意识。这些能力可平滑迁移到中后台系统、内部工具、SaaS 管理端等常见岗位场景。</p>
+
+</section>
+
+</body>
+</html>

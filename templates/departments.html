@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}科室管理 - 运维工单系统{% endblock %}
+{% block page_title %}科室管理{% endblock %}
+{% block page_sub %}维护报障科室信息{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <div class="spacer"></div>
+  <a href="{{ url_for('create_department') }}" class="btn btn-primary">＋ 新增科室</a>
+</div>
+<div class="card" style="padding:0">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>科室名称</th><th>说明</th><th>工单量</th><th></th></tr></thead>
+      <tbody>
+        {% for d in depts %}
+        <tr>
+          <td style="font-weight:600">{{ d.name }}</td>
+          <td class="muted">{{ d.description or '—' }}</td>
+          <td class="mono">{{ counts[d.id] }}</td>
+          <td style="text-align:right;white-space:nowrap">
+            <a href="{{ url_for('edit_department', did=d.id) }}" class="btn btn-ghost btn-sm">编辑</a>
+            <a href="{{ url_for('delete_department', did=d.id) }}" class="btn btn-danger btn-sm"
+               onclick="return confirm('确认删除该科室？')">删除</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="empty">暂无科室</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

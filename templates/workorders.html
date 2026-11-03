@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}工单管理 - 运维工单系统{% endblock %}
+{% block page_title %}工单管理{% endblock %}
+{% block page_sub %}{% if g.user.role=='engineer' %}我的工单{% else %}全部工单{% endif %}{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">全部状态</option>
+      {% for k,v in STATUS_LABELS.items() %}
+      <option value="{{ k }}" {% if status_filter==k %}selected{% endif %}>{{ v }}</option>
+      {% endfor %}
+    </select>
+    <select name="type" onchange="this.form.submit()">
+      <option value="">全部类型</option>
+      {% for k,v in ORDER_TYPES.items() %}
+      <option value="{{ k }}" {% if type_filter==k %}selected{% endif %}>{{ v }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  <div class="spacer"></div>
+  <a href="{{ url_for('create_workorder') }}" class="btn btn-primary">＋ 新建工单</a>
+</div>
+
+<div class="card" style="padding:0">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>工单号</th><th>类型</th><th>报障科室</th><th>报障内容</th>
+          <th>负责人</th><th>状态</th><th>报障人</th><th>创建时间</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td class="mono">{{ o.order_no }}</td>
+          <td><span class="badge type">{{ ORDER_TYPES[o.type] }}</span></td>
+          <td>{{ o.dept_name }}</td>
+          <td style="max-width:260px">{{ o.content }}</td>
+          <td>
+            <div style="font-weight:600">{{ o.assignee_name }}</div>
+            <div class="muted" style="font-size:12px">{{ o.assignee_group or '—' }}</div>
+          </td>
+          <td><span class="badge {{ o.status }}">{{ STATUS_LABELS[o.status] }}</span>
+            {% if o.timed_out %}<span class="badge timeout" style="margin-left:4px">超时</span>{% endif %}</td>
+          <td>{{ o.reporter_name }}</td>
+          <td class="mono muted" style="font-size:12px">{{ o.created_at[:16].replace('T',' ') }}</td>
+          <td><a href="{{ url_for('workorder_detail', oid=o.id) }}" class="btn-link">查看 ›</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="9" class="empty">暂无工单</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

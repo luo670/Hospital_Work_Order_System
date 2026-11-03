@@ -1,0 +1,27 @@
+[project]
+name = "ticket-system"
+version = "0.1.0"
+description = "医院运维工单系统"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "cryptography>=42.0",
+    "fastapi>=0.110",
+    "itsdangerous>=2.2.0",
+    "jinja2>=3.1",
+    "pymysql>=1.1",
+    "python-dotenv>=1.0",
+    "python-multipart>=0.0.9",
+    "sqlalchemy>=2.0",
+    "uvicorn>=0.27",
+    "werkzeug>=3.0",
+]
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]

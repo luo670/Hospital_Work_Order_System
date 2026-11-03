@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}排班表 · 运维工单系统{% endblock %}
+{% block page_title %}排班表{% endblock %}
+{% block page_sub %}各工程师分组值班安排（可切换分组与月份）{% endblock %}
+
+{% block content %}
+<div class="card">
+  <form class="toolbar" method="get" action="{{ url_for('schedule_view') }}">
+    <div>
+      <span class="muted" style="margin-right:6px">分组</span>
+      <select name="group" onchange="this.form.submit()" style="min-width:150px">
+        {% for g in groups %}
+        <option value="{{ g.id }}" {% if g.id==sel_group %}selected{% endif %}>{{ g.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <span class="muted" style="margin-right:6px">月份</span>
+      <select name="month" onchange="this.form.submit()" style="min-width:120px">
+        {% for m in months %}
+        <option value="{{ m }}" {% if m==month %}selected{% endif %}>{{ m }} 月</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="spacer"></div>
+    <span class="badge muted">📅 每月 24h 在岗 · 工作日白班2人/夜班1人 · 非工作日白班1人/夜班1人 · 服务台仅工作日08:00-17:30</span>
+  </form>
+
+  <div class="alert info" style="margin-top:4px">
+    值班规则：① 各分组每日 24 小时均需有人在岗；② 工作日白班 09:00–17:00 需 2 人、夜班 17:00–次日 09:00 需 1 人；
+    ③ 非工作日（周末 / 节假日）白班 09:00–17:00 需 1 人、夜班 17:00–次日 09:00 需 1 人，且同一天白班与夜班不得为同一人；④ 值夜班的工程师次日休息至少一天；
+    ⑤ 单个工程师一周工时上限 48 小时（超出将在下方标红提示）；⑥ 服务台为特殊岗位，仅工作日 08:00–17:30 值班，<b>不计入分组 24h 轮值计数</b>。
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>值班安排 · {{ month }} 月</h3></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:110px">日期</th>
+          <th style="width:64px">星期</th>
+          <th style="width:80px">类型</th>
+          <th>值班安排</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in cal %}
+        <tr>
+          <td class="mono">{{ d.date[5:] }}</td>
+          <td>{{ d.wd }}</td>
+          <td>
+            {% if d.type=='工作日' %}<span class="badge role">工作日</span>
+            {% elif d.type=='周末' %}<span class="badge type">周末</span>
+            {% else %}<span class="badge timeout">节假日</span>{% endif %}
+          </td>
+          <td>
+            {% if d.full %}
+              <span class="badge completed">全天 00:00–24:00</span>
+              <strong style="margin-left:6px">{{ d.full }}</strong>
+            {% else %}
+              <span class="badge role">白班 09:00–17:00</span>
+              <span style="margin:0 6px">{{ d.day|join('、') or '—' }}</span>
+              <br>
+              <span class="badge in_progress">夜班 17:00–09:00</span>
+              <strong style="margin-left:6px">{{ d.night or '—' }}</strong>
+              {% if d.service %}
+              <br>
+              <span class="badge service">服务台 08:00–17:30</span>
+              <strong style="margin-left:6px">{{ d.service }}</strong>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>本月工时统计（按自然周）</h3></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>工程师</th>
+          <th>各周工时</th>
+          <th style="width:120px">本月合计</th>
+          <th style="width:110px">状态</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in eng_hours %}
+        <tr>
+          <td><strong>{{ e.name }}</strong>{% if e.special %} <span class="badge service">{{ e.special }}</span>{% endif %}</td>
+          <td>
+            {% for w in e.weekly %}
+              <span class="badge {% if w.over %}timeout{% else %}role{% endif %}" style="margin-right:6px">
+                {{ w.label }}：{{ w.hours }}h{% if w.over %} ⚠{% endif %}
+              </span>
+            {% endfor %}
+          </td>
+          <td class="mono"><strong>{{ e.total }} h</strong></td>
+          <td>
+            {% if e.over %}<span class="badge timeout">超出 48h</span>
+            {% else %}<span class="badge completed">正常</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="alert warn" style="margin-top:14px">
+    说明：本排班由系统在满足「每日 24h 在岗、工作日白班 2 人 / 夜班 1 人、非工作日白班 1 人 / 夜班 1 人、夜班次日休息」的前提下自动均衡生成；服务台（特殊岗位）单独按工作日 08:00–17:30 排班，不计入分组轮值。<br>
+    各组编制已扩容（网络运维组常规轮值 6 人 + 服务台 1 人、硬件 / 系统软件组各 5 人），常规轮值工时均较宽松，通常可满足「单周 ≤ 48h」；若个别周次仍超标会在此标红。<br>
+    如需调整班组编制或排班规则，可直接告诉我，我再来重排。
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}员工评估 - 运维工单系统{% endblock %}
+{% block page_title %}员工评估{% endblock %}
+{% block page_sub %}基于已完结工单，量化工程师工作表现（接入大模型自动总结）{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-head">
+    <h3>工程师评估一览</h3>
+    <span class="muted" style="font-size:12px">
+      处理时长 = 派发到完结的耗时；满意度默认满分，可由管理员评定为不满意
+    </span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>工程师</th><th>分组</th><th>完成工单</th><th>平均处理时长</th>
+          <th>超时</th><th>满意度</th><th>最近评估</th><th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for d in data %}
+        <tr>
+          <td><b>{{ d.engineer.name }}</b></td>
+          <td>{{ d.engineer.group_name or '—' }}</td>
+          <td class="mono">{{ d.n }}</td>
+          <td class="mono">{% if d.n %}{{ '%.1f' % d.avg }}h{% else %}—{% endif %}</td>
+          <td class="mono">{% if d.overtime %}<span class="badge timeout">{{ d.overtime }}</span>{% else %}0{% endif %}</td>
+          <td class="mono">{% if d.n %}{{ d.sat }}/{{ d.n }}{% else %}—{% endif %}</td>
+          <td class="muted" style="font-size:12px">{% if d.eval %}{{ d.eval.created_at[:16].replace('T',' ') }}{% else %}未生成{% endif %}</td>
+          <td class="row" style="gap:8px">
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('evaluation_detail', eid=d.engineer.id) }}">查看</a>
+            <form method="post" action="{{ url_for('generate_evaluation', eid=d.engineer.id) }}">
+              <button class="btn btn-primary btn-sm" type="submit">{{ '重新生成' if d.eval else '生成评估' }}</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

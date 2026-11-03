@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}运维工单系统{% endblock %}</title>
+  <style>
+    :root{
+      --bg:#f4f6f9; --surface:#ffffff; --surface-2:#fafbfc;
+      --primary:#2563eb; --primary-weak:#eef3ff; --primary-line:#dbe6ff;
+      --text:#1f2937; --muted:#6b7280; --faint:#9ca3af;
+      --border:#e6e8eb; --border-strong:#d8dce1;
+      --amber:#b45309; --amber-bg:#fef3e2; --amber-line:#f6d9a8;
+      --blue:#1d4ed8; --blue-bg:#e7efff; --blue-line:#c5d8ff;
+      --green:#047857; --green-bg:#e6f6ee; --green-line:#b6e3cc;
+      --red:#b91c1c; --red-bg:#fdeaea; --red-line:#f5bdbd;
+      --purple:#7c3aed; --purple-bg:#f3ebff; --purple-line:#dcc9ff;
+      --shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.06);
+      --radius:10px;
+      --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);
+      font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    .layout{display:flex;min-height:100vh}
+
+    /* 侧边栏 */
+    .sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);
+      display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+    .brand{padding:20px 22px;display:flex;align-items:center;gap:11px;
+      border-bottom:1px solid var(--border)}
+    .brand .logo{width:34px;height:34px;border-radius:9px;background:var(--primary);
+      color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700}
+    .brand .name{font-size:15px;font-weight:700;letter-spacing:.5px}
+    .brand .sub{font-size:11px;color:var(--faint);font-weight:400}
+    .nav{padding:14px 12px;flex:1;overflow-y:auto}
+    .nav .group-label{font-size:11px;color:var(--faint);padding:10px 12px 6px;letter-spacing:1px}
+    .nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;
+      color:var(--muted);font-weight:500;margin-bottom:2px;transition:.15s}
+    .nav a .ic{width:18px;text-align:center;font-size:15px}
+    .nav a:hover{background:var(--surface-2);color:var(--text)}
+    .nav a.active{background:var(--primary-weak);color:var(--primary);font-weight:600}
+    .nav a.active .ic{color:var(--primary)}
+
+    /* 主区域 */
+    .main{flex:1;display:flex;flex-direction:column;min-width:0}
+    .topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:10}
+    .topbar .page-title{font-size:17px;font-weight:700}
+    .topbar .page-sub{font-size:12px;color:var(--faint);font-weight:400;margin-top:1px}
+    .userchip{display:flex;align-items:center;gap:10px}
+    .userchip .meta{text-align:right;line-height:1.25}
+    .userchip .meta .nm{font-weight:600;font-size:13px}
+    .userchip .meta .rl{font-size:11px;color:var(--faint)}
+    .avatar{width:34px;height:34px;border-radius:50%;background:var(--primary-weak);
+      color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+    .content{padding:26px;flex:1}
+
+    /* 卡片 */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:20px 22px;margin-bottom:20px}
+    .card h3{margin:0 0 16px;font-size:15px;font-weight:700}
+    .card .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .card .card-head h3{margin:0}
+
+    /* 统计卡 */
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+    .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+      padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .stat .label{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .stat .value{font-size:30px;font-weight:700;line-height:1}
+    .stat .bar{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
+    .stat.blue .bar{background:var(--primary)} .stat.blue .value{color:var(--primary)}
+    .stat.green .bar{background:var(--green)} .stat.green .value{color:var(--green)}
+    .stat.amber .bar{background:var(--amber)} .stat.amber .value{color:var(--amber)}
+    .stat.red .bar{background:var(--red)} .stat.red .value{color:var(--red)}
+
+    /* 按钮 */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:8px;
+      font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:.15s;
+      font-family:inherit;line-height:1.2}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover{background:#1d4ed8}
+    .btn-ghost{background:var(--surface);border-color:var(--border-strong);color:var(--text)}
+    .btn-ghost:hover{background:var(--surface-2)}
+    .btn-danger{background:#fff;border-color:var(--red-line);color:var(--red)}
+    .btn-danger:hover{background:var(--red-bg)}
+    .btn-sm{padding:5px 11px;font-size:12px}
+    .btn-link{background:none;border:none;color:var(--primary);cursor:pointer;font-size:13px;padding:0;font-family:inherit}
+
+    /* 表格 */
+    .table-wrap{overflow-x:auto;border-radius:var(--radius)}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    thead th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;
+      padding:11px 14px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface-2)}
+    tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover{background:var(--surface-2)}
+    .mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+    /* 徽章 */
+    .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+    .badge.assigned{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-line)}
+    .badge.in_progress{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-line)}
+    .badge.completed{background:var(--green-bg);color:var(--green);border:1px solid var(--green-line)}
+    .badge.role{background:var(--surface-2);color:var(--muted);border:1px solid var(--border)}
+    .badge.type{background:var(--primary-weak);color:var(--primary);border:1px solid var(--primary-line)}
+    .badge.timeout{background:var(--red-bg);color:var(--red);border:1px solid var(--red-line)}
+    .badge.muted{background:var(--surface-2);color:var(--faint);border:1px solid var(--border)}
+    .badge.service{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-line)}
+    .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+    /* 表单 */
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+    .field{margin-bottom:16px}
+    .field.full{grid-column:1 / -1}
+    .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+    .field .hint{font-size:12px;color:var(--faint);font-weight:400;margin-left:6px}
+    input[type=text],input[type=password],select,textarea{
+      width:100%;padding:9px 12px;border:1px solid var(--border-strong);border-radius:8px;
+      font-size:13px;font-family:inherit;background:var(--surface);color:var(--text);transition:.15s}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-weak)}
+    textarea{resize:vertical;min-height:84px}
+
+    /* 筛选条 */
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
+    .toolbar .spacer{flex:1}
+    .toolbar select{padding:7px 11px;width:auto;min-width:130px}
+    .toolbar input[type=text]{width:auto;min-width:200px}
+
+    /* 提示 */
+    .flash{margin-bottom:16px}
+    .alert{padding:11px 15px;border-radius:8px;font-size:13px;margin-bottom:10px;border:1px solid}
+    .alert.info{background:var(--primary-weak);border-color:var(--primary-line);color:var(--blue)}
+    .alert.ok{background:var(--green-bg);border-color:var(--green-line);color:var(--green)}
+    .alert.warn{background:var(--amber-bg);border-color:var(--amber-line);color:var(--amber)}
+
+    .empty{text-align:center;color:var(--faint);padding:40px 0}
+    .muted{color:var(--muted)}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .kv{display:grid;grid-template-columns:120px 1fr;gap:10px 14px;font-size:13px}
+    .kv dt{color:var(--muted)}
+    .kv dd{margin:0;font-weight:500}
+    .section-title{font-size:13px;font-weight:700;color:var(--muted);margin:22px 0 10px;letter-spacing:.5px}
+
+    /* 标签快捷选择（故障原因/解决方法复用） */
+    .tag-hint{font-size:12px;color:var(--faint);margin:4px 0 2px}
+    .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+    .chip{display:inline-flex;align-items:center;padding:4px 10px;border:1px solid var(--border-strong);
+      background:var(--surface-2);border-radius:16px;font-size:12px;color:var(--muted);cursor:pointer;transition:.15s}
+    .chip:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-weak)}
+
+    /* 员工评估 */
+    .eval-summary{background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--primary);
+      border-radius:8px;padding:14px 16px;font-size:13.5px;line-height:1.85;white-space:pre-wrap}
+    .badge.satisfied{background:var(--green-bg);color:var(--green);border:1px solid var(--green-line)}
+    .badge.unsatisfied{background:var(--red-bg);color:var(--red);border:1px solid var(--red-line)}
+    .hours.over{color:var(--red);font-weight:600}
+    @media(max-width:920px){.sidebar{display:none}.stats{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}}
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% if g.user %}
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">运</div>
+        <div>
+          <div class="name">运维工单系统</div>
+          <div class="sub">Hospital Ops Ticket</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="{{ url_for('dashboard') }}" class="{% if endpoint=='dashboard' %}active{% endif %}">
+          <span class="ic">▦</span> 工单情况</a>
+        <a href="{{ url_for('workorders') }}" class="{% if endpoint=='workorders' or endpoint=='create_workorder' or endpoint=='workorder_detail' %}active{% endif %}">
+          <span class="ic">🛠</span> 工单管理</a>
+        <a href="{{ url_for('schedule_view') }}" class="{% if endpoint=='schedule_view' %}active{% endif %}">
+          <span class="ic">🗓</span> 排班表</a>
+        <a href="{{ url_for('rag_page') }}" class="{% if endpoint=='rag_page' %}active{% endif %}">
+          <span class="ic">🤖</span> 智能助手</a>
+        {% if g.user.role in ('admin','supervisor') %}
+        <a href="{{ url_for('evaluations') }}" class="{% if endpoint in ('evaluations','evaluation_detail') %}active{% endif %}">
+          <span class="ic">📊</span> 员工评估</a>
+        <div class="group-label">管理后台</div>
+        {% endif %}
+        {% if g.user.role=='admin' %}
+        <a href="{{ url_for('groups') }}" class="{% if endpoint in ('groups','create_group','edit_group') %}active{% endif %}">
+          <span class="ic">⛬</span> 工程师分组</a>
+        <a href="{{ url_for('departments') }}" class="{% if endpoint in ('departments','create_department','edit_department') %}active{% endif %}">
+          <span class="ic">🏥</span> 科室管理</a>
+        <a href="{{ url_for('users') }}" class="{% if endpoint in ('users','create_user','edit_user') %}active{% endif %}">
+          <span class="ic">👤</span> 用户管理</a>
+        {% endif %}
+      </nav>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <div>
+          <div class="page-title">{% block page_title %}工单情况{% endblock %}</div>
+          <div class="page-sub">{% block page_sub %}{% endblock %}</div>
+        </div>
+        <div class="userchip">
+          <div class="meta">
+            <div class="nm">{{ g.user.name }}</div>
+            <div class="rl">{{ ROLE_LABELS[g.user.role] }}</div>
+          </div>
+          <div class="avatar">{{ g.user.name[0] }}</div>
+          <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm" style="margin-left:6px">退出</a>
+        </div>
+      </header>
+      <main class="content">
+        {% with messages = get_flashed_messages(with_categories=false) %}
+        {% if messages %}<div class="flash">
+          {% for m in messages %}<div class="alert info">{{ m }}</div>{% endfor %}
+        </div>{% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  {% else %}
+    {% block auth %}{% endblock %}
+  {% endif %}
+</body>
+</html>

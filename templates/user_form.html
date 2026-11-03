@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{% if u %}编辑账号{% else %}新增账号{% endif %} - 运维工单系统{% endblock %}
+{% block page_title %}{% if u %}编辑账号{% else %}新增账号{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:560px">
+  <form method="post" action="{{ url_for('edit_user', uid=u.id) if u else url_for('create_user') }}">
+    <div class="form-grid">
+      <div class="field">
+        <label>用户名<span class="hint">登录账号</span></label>
+        <input type="text" name="username" value="{{ u.username if u else '' }}" placeholder="登录用户名" required
+          {% if u %}readonly{% endif %}>
+      </div>
+      <div class="field">
+        <label>姓名</label>
+        <input type="text" name="name" value="{{ u.name if u else '' }}" placeholder="显示姓名" required>
+      </div>
+      <div class="field">
+        <label>角色</label>
+        <select name="role" required>
+          {% for k,v in ROLE_LABELS.items() %}
+          <option value="{{ k }}" {% if u and u.role==k %}selected{% endif %}>{{ v }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label>所属分组<span class="hint">仅工程师</span></label>
+        <select name="group_id">
+          <option value="">不分组</option>
+          {% for g in groups %}
+          <option value="{{ g.id }}" {% if u and u.group_id==g.id %}selected{% endif %}>{{ g.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field full">
+        <label>密码<span class="hint">{% if u %}留空则不修改{% else %}初始密码{% endif %}</span></label>
+        <input type="password" name="password" placeholder="{% if u %}留空保持不变{% else %}设置初始密码{% endif %}" {% if not u %}required{% endif %}>
+      </div>
+      <div class="field full">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:600">
+          <input type="checkbox" name="active" style="width:auto" {% if not u or u.active %}checked{% endif %}> 账号启用
+        </label>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn btn-primary" type="submit">保存</button>
+      <a href="{{ url_for('users') }}" class="btn btn-ghost">取消</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

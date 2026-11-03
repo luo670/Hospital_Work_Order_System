@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}智能助手 - 运维工单系统{% endblock %}
+{% block page_title %}智能助手 · 故障经验检索{% endblock %}
+{% block page_sub %}输入新故障描述，系统检索相似历史工单并给出解决建议{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-head">
+    <h3>描述你遇到的故障</h3>
+    <div class="row" style="gap:8px;align-items:center">
+      <span class="badge muted">知识库：{{ kb_count }} 条</span>
+      {% if is_admin %}
+      <form method="post" action="{{ url_for('rag_rebuild') }}" style="margin:0">
+        <button class="btn btn-ghost btn-sm" type="submit">构建 / 重建知识库</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="field">
+    <textarea id="q" placeholder="例如：门诊医生站电脑开机后频繁蓝屏，重启也无法进入系统" style="min-height:96px"></textarea>
+    <div class="tag-hint">可补充设备类型、报障科室、已尝试过的操作，检索会更准确。</div>
+  </div>
+  <div class="row" style="align-items:center">
+    <button class="btn btn-primary" id="askBtn" type="button">检索相似工单并给建议</button>
+    <span class="muted" id="status" style="font-size:12px"></span>
+  </div>
+</div>
+
+{% if kb_count == 0 %}
+<div class="alert warn">
+  知识库尚未构建。{% if is_admin %}请点击右上角「构建 / 重建知识库」把历史工单向量化（会调用 embedding 接口，产生少量费用）。{% else %}请联系管理员在「智能助手」页构建知识库后再使用。{% endif %}
+</div>
+{% endif %}
+
+<div id="result" style="display:none">
+  <div class="card">
+    <h3>AI 解决建议</h3>
+    <div class="eval-summary" id="suggestion" style="white-space:pre-wrap"></div>
+  </div>
+  <div class="card">
+    <h3>相似历史工单</h3>
+    <div id="matches"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var btn = document.getElementById('askBtn');
+  var q = document.getElementById('q');
+  var status = document.getElementById('status');
+  var result = document.getElementById('result');
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  btn.addEventListener('click', function () {
+    var text = q.value.trim();
+    if (!text) { status.textContent = '请先输入故障描述'; return; }
+    btn.disabled = true;
+    status.textContent = '正在检索并生成建议…';
+    fetch("{{ url_for('rag_ask') }}", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: text })
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      btn.disabled = false;
+      if (!data.ok) { status.textContent = '失败：' + (data.error || '未知错误'); return; }
+      status.textContent = '完成';
+      document.getElementById('suggestion').textContent = data.suggestion || '（无建议）';
+      var box = document.getElementById('matches');
+      box.innerHTML = '';
+      (data.matches || []).forEach(function (m) {
+        var div = document.createElement('div');
+        div.style.cssText = 'padding:14px 16px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;background:var(--surface-2)';
+        var score = (m.score * 100).toFixed(1);
+        div.innerHTML =
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+            '<span class="badge type">' + esc(m.type) + '</span>' +
+            '<span class="muted" style="font-size:12px">相似度 ' + score + '%</span>' +
+          '</div>' +
+          '<div style="font-weight:600;margin-bottom:6px">' + esc(m.order_no) + ' · ' + esc(m.dept_name) + '</div>' +
+          '<div style="white-space:pre-wrap;font-size:13px;color:var(--muted);margin-bottom:8px">' + esc(m.content) + '</div>' +
+          '<div style="font-size:13px;margin-bottom:4px"><b>故障原因：</b>' + esc(m.cause || '—') + '</div>' +
+          '<div style="font-size:13px"><b>解决方法：</b>' + esc(m.solution || '—') + '</div>';
+        box.appendChild(div);
+      });
+      result.style.display = 'block';
+    }).catch(function (e) {
+      btn.disabled = false;
+      status.textContent = '请求失败：' + e;
+    });
+  });
+})();
+</script>
+{% endblock %}

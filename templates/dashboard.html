@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}工单情况 - 运维工单系统{% endblock %}
+{% block page_title %}工单情况{% endblock %}
+{% block page_sub %}运维工单总体概况与超时监控{% endblock %}
+
+{% block content %}
+<div class="stats">
+  <div class="stat blue"><span class="bar"></span><div class="label">工单总数</div><div class="value mono">{{ total }}</div></div>
+  <div class="stat green"><span class="bar"></span><div class="label">已完成</div><div class="value mono">{{ completed }}</div></div>
+  <div class="stat amber"><span class="bar"></span><div class="label">处理中 / 待接受</div><div class="value mono">{{ open_count }}</div></div>
+  <div class="stat red"><span class="bar"></span><div class="label">超时工单</div><div class="value mono">{{ overdue_count }}</div></div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>近 14 天工单趋势（蓝：新建 · 红：超时）</h3></div>
+  {% set maxv = (daily_created + daily_timeout)|max or 1 %}
+  <svg viewBox="0 0 720 250" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近14天工单趋势">
+    <!-- 网格线 -->
+    {% for g in range(0,5) %}
+      {% set gy = 10 + (190 * g / 4) %}
+      <line x1="34" y1="{{ gy }}" x2="708" y2="{{ gy }}" stroke="#eef0f3" stroke-width="1"/>
+    {% endfor %}
+    {% for i in range(labels|length) %}
+      {% set slot = 664 / 14 %}
+      {% set x = 36 + slot * i %}
+      {% set cv = daily_created[i] %}
+      {% set tv = daily_timeout[i] %}
+      {% set ch = (cv / maxv * 188) if maxv else 0 %}
+      {% set th = (tv / maxv * 188) if maxv else 0 %}
+      {% if cv > 0 %}<rect x="{{ x + 4 }}" y="{{ 200 - ch }}" width="14" height="{{ ch }}" rx="2" fill="#2563eb"/>{% endif %}
+      {% if tv > 0 %}<rect x="{{ x + 22 }}" y="{{ 200 - th }}" width="14" height="{{ th }}" rx="2" fill="#dc2626"/>{% endif %}
+      <text x="{{ x + 20 }}" y="224" font-size="9" fill="#9ca3af" text-anchor="middle">{{ labels[i] }}</text>
+    {% endfor %}
+    <line x1="34" y1="200" x2="708" y2="200" stroke="#d8dce1" stroke-width="1"/>
+  </svg>
+</div>
+
+<div class="row" style="align-items:stretch">
+  <div class="card" style="flex:1;min-width:300px">
+    <div class="card-head"><h3>工单类型分布</h3></div>
+    {% set tmax = type_data|max or 1 %}
+    {% for i in range(type_labels|length) %}
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px">
+          <span>{{ type_labels[i] }}</span><span class="mono muted">{{ type_data[i] }}</span>
+        </div>
+        <div style="background:var(--surface-2);border-radius:6px;height:10px;overflow:hidden">
+          <div style="width:{{ (type_data[i] / tmax * 100)|round }}%;height:100%;background:var(--primary);border-radius:6px"></div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="card" style="flex:1;min-width:300px">
+    <div class="card-head"><h3>各分组工单量</h3></div>
+    {% set gmax = group_data|max or 1 %}
+    {% for i in range(group_labels|length) %}
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px">
+          <span>{{ group_labels[i] }}</span><span class="mono muted">{{ group_data[i] }}</span>
+        </div>
+        <div style="background:var(--surface-2);border-radius:6px;height:10px;overflow:hidden">
+          <div style="width:{{ (group_data[i] / gmax * 100)|round }}%;height:100%;background:#0ea5a4;border-radius:6px"></div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

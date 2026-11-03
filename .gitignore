@@ -1,0 +1,79 @@
+# ============================================================
+# 医院运维工单系统 —— Git 忽略规则
+# 原则：密钥、本地数据、虚拟环境、内置运行时、生成产物一律不入库；
+#      pyproject.toml / uv.lock / Dockerfile / docker-compose.yml 必须入库。
+# ============================================================
+
+# ---------- 敏感信息（最重要）----------
+# 本地环境变量：含 DASHSCOPE_API_KEY / SECRET_KEY，绝不提交
+.env
+.env.*
+# 但允许提交脱敏模板
+!.env.example
+
+# ---------- 本地数据库 ----------
+*.db
+*.sqlite
+*.sqlite3
+
+# ---------- Python 运行产物 ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.egg-info/
+build/
+dist/
+wheels/
+
+# ---------- 虚拟环境（由 uv sync 还原，不入库）----------
+.venv/
+venv/
+env/
+ENV/
+
+# ---------- 测试 / 类型检查缓存 ----------
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# ---------- 内置绿色版 Python（体积大，克隆后用 uv sync 装依赖即可）----------
+python/
+
+# ---------- IDE / 操作系统 ----------
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ---------- 日志与临时文件 ----------
+*.log
+*.tmp
+*.bak
+*.orig
+# Windows 保留设备名残留：Git Bash 里 `2>nul` 会误建一个真实文件，
+# 该文件无法正常删除/索引，直接在忽略规则里屏蔽
+nul
+
+# ---------- AI 助手本地状态 ----------
+.workbuddy/
+
+# ---------- 本地归档（旧 Flask 版本代码与旧数据库）----------
+_archive/
+
+# ---------- 技术文档生成流水线产物 ----------
+# 旧版（Flask + SQLite 时期）文档不对应当前技术栈，不发布
+output/req-techstack-20261103/
+# 流水线状态文件属于生成过程产物
+output/**/pipeline-state.yaml
+
+# ============================================================
+# 以下文件必须提交，请勿加入忽略：
+#   pyproject.toml  uv.lock  Dockerfile  docker-compose.yml
+#   .dockerignore   .python-version  .env.example
+# ============================================================

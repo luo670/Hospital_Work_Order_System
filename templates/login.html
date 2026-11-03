@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}登录 - 运维工单系统{% endblock %}
+{% block auth %}
+<style>
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#eef3ff 0%,#f4f6f9 60%);padding:20px}
+  .login-card{width:380px;background:#fff;border:1px solid var(--border);border-radius:14px;
+    box-shadow:var(--shadow);padding:34px 32px}
+  .login-brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .login-brand .logo{width:42px;height:42px;border-radius:11px;background:var(--primary);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700}
+  .login-brand .t{font-size:19px;font-weight:700}
+  .login-brand .s{font-size:12px;color:var(--faint)}
+  .login-card h2{margin:0 0 4px;font-size:17px}
+  .login-card .desc{color:var(--muted);font-size:13px;margin-bottom:22px}
+  .login-btn{width:100%;justify-content:center;padding:11px;font-size:14px;margin-top:6px}
+  .login-foot{margin-top:18px;font-size:12px;color:var(--faint);text-align:center;line-height:1.7}
+  .login-foot code{background:var(--surface-2);padding:1px 6px;border-radius:5px;color:var(--muted)}
+</style>
+{% with messages = get_flashed_messages() %}
+{% if messages %}{% for m in messages %}<div class="alert warn" style="max-width:380px;margin:0 auto 16px">{{ m }}</div>{% endfor %}{% endif %}
+{% endwith %}
+<div class="login-wrap">
+  <form class="login-card" method="post" action="{{ url_for('login') }}">
+    <div class="login-brand">
+      <div class="logo">运</div>
+      <div><div class="t">运维工单系统</div><div class="s">Hospital Operations Ticket</div></div>
+    </div>
+    <h2>账号登录</h2>
+    <div class="desc">请使用管理员分配的账号登录系统</div>
+    <div class="field">
+      <label>用户名</label>
+      <input type="text" name="username" placeholder="请输入用户名" autofocus required>
+    </div>
+    <div class="field">
+      <label>密码</label>
+      <input type="password" name="password" placeholder="请输入密码" required>
+    </div>
+    <button class="btn btn-primary login-btn" type="submit">登 录</button>
+    <div class="login-foot">
+      默认管理员账号 <code>admin / admin123</code><br>
+      生产环境请务必修改默认密码
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+# 医院运维工单系统 —— 应用 + MySQL 一键启动
+#
+#   docker compose up --build      # 构建镜像并启动（首次会初始化数据库、写入演示数据）
+#   docker compose down            # 停止并保留数据
+#   docker compose down -v         # 停止并清空数据库数据卷（下次启动重新初始化）
+#
+# 变量说明：compose 会自动读取同目录的 .env 做 ${VAR} 替换，
+# 因此至少需要在 .env 中提供 DASHSCOPE_API_KEY（RAG / 员工评估要用）。
+# 注意：.env 已被 .dockerignore 排除，不会打进镜像，只用于变量替换与注入。
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: workorder
+    # 与应用内 CREATE DATABASE ... utf8mb4 / utf8mb4_unicode_ci 保持一致，避免中文乱码
+    command: "--character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      # 注意用 127.0.0.1：MySQL 客户端传 -h localhost 会走 socket，
+      # 只有走 TCP 才能真正验证「服务端已可接受网络连接」
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 60s
+
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      # 指向 db 服务（容器内用服务名做 DNS 解析），会覆盖 .env 里的 127.0.0.1
+      - "DATABASE_URL=mysql+pymysql://root:root@db:3306/workorder?charset=utf8mb4"
+      - "SECRET_KEY=${SECRET_KEY:-change-this-in-production}"
+      - "DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}"
+      - "DASHSCOPE_BASE_URL=${DASHSCOPE_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}"
+      - "QWEN_MODEL=${QWEN_MODEL:-qwen-plus}"
+      - "EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-v3}"
+      - "EMBEDDING_BASE_URL=${EMBEDDING_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}"
+    depends_on:
+      db:
+        # 等 healthcheck 通过再启动，避免「MySQL 已监听但还在初始化」导致首个连接失败
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mysql_data:

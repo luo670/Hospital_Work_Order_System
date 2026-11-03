@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}工程师分组 - 运维工单系统{% endblock %}
+{% block page_title %}工程师分组{% endblock %}
+{% block page_sub %}按专业划分工程师团队{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <div class="spacer"></div>
+  <a href="{{ url_for('create_group') }}" class="btn btn-primary">＋ 新增分组</a>
+</div>
+<div class="card" style="padding:0">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>分组名称</th><th>职责说明</th><th>工程师数</th><th></th></tr></thead>
+      <tbody>
+        {% for g in groups %}
+        <tr>
+          <td style="font-weight:600">{{ g.name }}</td>
+          <td class="muted">{{ g.description or '—' }}</td>
+          <td class="mono">{{ g.member_count }}</td>
+          <td style="text-align:right;white-space:nowrap">
+            <a href="{{ url_for('edit_group', gid=g.id) }}" class="btn btn-ghost btn-sm">编辑</a>
+            <a href="{{ url_for('delete_group', gid=g.id) }}" class="btn btn-danger btn-sm"
+               onclick="return confirm('确认删除该分组？')">删除</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="empty">暂无分组</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

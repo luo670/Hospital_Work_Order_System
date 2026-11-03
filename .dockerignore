@@ -1,0 +1,26 @@
+# 敏感信息：容器内一律通过环境变量注入（compose / docker run），绝不打包进镜像
+.env
+
+# 本地数据库文件（生产用 db 服务的 MySQL）
+*.db
+
+# Python 运行时产物
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# 内置绿色版 Python：镜像内使用官方 python:3.13-slim，无需拷贝
+python/
+
+# 版本控制
+.git/
+
+# 测试与文档：运行时不需要，减小构建上下文
+tests/
+README.md
+
+# 其它本地/IDE 产物
+.idea/
+_archive/
+output/

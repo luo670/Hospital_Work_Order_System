@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}工单详情 - 运维工单系统{% endblock %}
+{% block page_title %}工单详情{% endblock %}
+{% block page_sub %}{{ o.order_no }}{% endblock %}
+
+{% block content %}
+<div class="row" style="align-items:flex-start">
+  <div class="card" style="flex:1;min-width:420px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+      <span class="badge type">{{ ORDER_TYPES[o.type] }}</span>
+      <span class="badge {{ o.status }}">{{ STATUS_LABELS[o.status] }}</span>
+      {% if o.timed_out %}<span class="badge timeout">超时工单</span>{% endif %}
+      {% if o.status == 'completed' %}
+        {% if o.satisfaction == 'satisfied' %}<span class="badge satisfied">满意</span>
+        {% else %}<span class="badge unsatisfied">不满意</span>{% endif %}
+      {% endif %}
+    </div>
+    <dl class="kv">
+      <dt>工单编号</dt><dd class="mono">{{ o.order_no }}</dd>
+      <dt>报障科室</dt><dd>{{ o.dept_name }}</dd>
+      <dt>报障内容</dt><dd>{{ o.content }}</dd>
+      <dt>报障人</dt><dd>{{ o.reporter_name }}</dd>
+      <dt>负责人</dt><dd><b>{{ o.assignee_name }}</b>{% if o.assignee_group %} · {{ o.assignee_group }}{% endif %}</dd>
+      <dt>指派来源</dt><dd>{{ o.assigned_by_name or '—' }}</dd>
+      <dt>创建时间</dt><dd class="mono">{{ o.created_at[:16].replace('T',' ') }}</dd>
+      {% if o.accepted_at %}<dt>接受时间</dt><dd class="mono">{{ o.accepted_at[:16].replace('T',' ') }}</dd>{% endif %}
+      {% if o.completed_at %}<dt>完成时间</dt><dd class="mono">{{ o.completed_at[:16].replace('T',' ') }}</dd>{% endif %}
+      {% if o.completed_at %}<dt>处理时长</dt><dd class="mono">{{ '%.1f' % o.hours }} 小时{% if o.hours > 24 %}（超时）{% endif %}</dd>{% endif %}
+    </dl>
+
+    {% if o.status == 'completed' %}
+    <div class="section-title">处理结论</div>
+    <dl class="kv">
+      <dt>故障原因</dt><dd>{{ o.cause or '—' }}</dd>
+      <dt>解决方法</dt><dd>{{ o.solution or '—' }}</dd>
+      {% if o.satisfaction == 'unsatisfied' and o.unsat_reason %}
+      <dt>不满意原因</dt><dd><span class="badge unsatisfied" style="font-weight:500">{{ o.unsat_reason }}</span></dd>
+      {% endif %}
+    </dl>
+    {% endif %}
+  </div>
+
+  <div class="card" style="width:360px">
+    <h3>操作</h3>
+    {% if o.status == 'assigned' %}
+      {% if (g.user.role == 'engineer' and g.user.id == o.assignee_id) or g.user.role == 'admin' %}
+      <form method="post" action="{{ url_for('accept_workorder', oid=o.id) }}">
+        <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">接受工单</button>
+      </form>
+      {% else %}
+      <div class="alert info">等待负责人（{{ o.assignee_name }}）接受工单</div>
+      {% endif %}
+    {% elif o.status == 'in_progress' %}
+      {% if (g.user.role == 'engineer' and g.user.id == o.assignee_id) or g.user.role == 'admin' %}
+      <form method="post" action="{{ url_for('complete_workorder', oid=o.id) }}">
+        <div class="field">
+          <label>故障原因<span class="hint">由工程师填写</span></label>
+          <textarea id="cause" name="cause" placeholder="例如：内存条接触不良，系统引导文件损坏" required></textarea>
+          <div class="tag-hint">常用故障原因（点击快速填入）：</div>
+          <div class="chips">
+            {% for t in reason_tags %}<span class="chip" data-target="cause">{{ t }}</span>{% endfor %}
+          </div>
+        </div>
+        <div class="field">
+          <label>解决方法</label>
+          <textarea id="solution" name="solution" placeholder="例如：重新插拔并清理内存条金手指，重建引导记录" required></textarea>
+          <div class="tag-hint">常用解决方法（点击快速填入）：</div>
+          <div class="chips">
+            {% for t in solution_tags %}<span class="chip" data-target="solution">{{ t }}</span>{% endfor %}
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">完成工单</button>
+      </form>
+      {% else %}
+      <div class="alert info">工单处理中，等待负责人（{{ o.assignee_name }}）完成</div>
+      {% endif %}
+    {% elif o.status == 'completed' %}
+      <div class="alert ok">该工单已完成{% if o.timed_out %}（已超时完结）{% endif %}</div>
+    {% endif %}
+
+    {% if g.user.role in ('admin','supervisor') and o.status in ('assigned','in_progress') %}
+    <div class="section-title">改派负责人</div>
+    <form method="post" action="{{ url_for('assign_workorder', oid=o.id) }}" class="row" style="align-items:flex-end">
+      <div class="field" style="flex:1;margin:0">
+        <select name="assignee_id" required>
+          <option value="">选择工程师</option>
+          {% set cur_g = '' %}
+          {% for e in engineers %}
+            {% if e.group_name != cur_g %}
+              {% if not loop.first %}</optgroup>{% endif %}
+              <optgroup label="{{ e.group_name }}">{% set cur_g = e.group_name %}
+            {% endif %}
+            <option value="{{ e.id }}" {% if e.id == o.assignee_id %}selected{% endif %}>{{ e.name }}</option>
+            {% if loop.last %}</optgroup>{% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      <button class="btn btn-ghost" type="submit">改派</button>
+    </form>
+    {% endif %}
+
+    {% if g.user.role == 'admin' %}
+    <div class="section-title">满意度评定</div>
+    {% if o.satisfaction == 'unsatisfied' %}
+    <div class="alert warn" style="margin-bottom:12px">当前为「不满意」：{{ o.unsat_reason or '（未填写原因）' }}</div>
+    {% endif %}
+    <form method="post" action="{{ url_for('set_satisfaction', oid=o.id) }}">
+      <div class="field">
+        <select name="satisfaction" id="satSel" onchange="document.getElementById('reasonBox').style.display = (this.value==='unsatisfied') ? 'block' : 'none'">
+          <option value="satisfied" {% if o.satisfaction != 'unsatisfied' %}selected{% endif %}>满意（默认满分）</option>
+          <option value="unsatisfied" {% if o.satisfaction == 'unsatisfied' %}selected{% endif %}>不满意</option>
+        </select>
+      </div>
+      <div class="field" id="reasonBox" style="display:{% if o.satisfaction == 'unsatisfied' %}block{% else %}none{% endif %}">
+        <label>不满意原因<span class="hint">必填</span></label>
+        <textarea name="unsat_reason" placeholder="请说明不满意的具体原因">{{ o.unsat_reason or '' }}</textarea>
+      </div>
+      <button class="btn btn-ghost" type="submit" style="width:100%;justify-content:center">保存评定</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.chip').forEach(function(c){
+  c.addEventListener('click', function(){
+    var t = document.getElementById(c.getAttribute('data-target'));
+    if(!t) return;
+    if(t.value.trim()){ t.value = t.value + '\n' + c.textContent; }
+    else { t.value = c.textContent; }
+  });
+});
+</script>
+{% endblock %}

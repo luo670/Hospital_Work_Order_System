@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}新建工单 - 运维工单系统{% endblock %}
+{% block page_title %}新建工单{% endblock %}
+{% block page_sub %}填写报障信息并指派负责人{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:760px">
+  <form method="post" action="{{ url_for('create_workorder') }}">
+    <div class="form-grid">
+      <div class="field">
+        <label>故障类型</label>
+        <select name="type" required>
+          <option value="">请选择类型</option>
+          {% for k,v in ORDER_TYPES.items() %}
+          <option value="{{ k }}">{{ v }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label>报障科室</label>
+        <select name="department_id" required>
+          <option value="">请选择科室</option>
+          {% for d in depts %}
+          <option value="{{ d.id }}">{{ d.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field full">
+        <label>报障内容<span class="hint">由报障人填写，描述故障现象</span></label>
+        <textarea name="content" placeholder="例如：门诊医生站电脑蓝屏，反复重启无法进入系统" required></textarea>
+      </div>
+
+      {% if is_engineer %}
+      <div class="field full">
+        <label>负责人</label>
+        <div class="alert info" style="margin:0">工单将登记在您本人（{{ g.user.name }}）名下，提交后由您负责处理。</div>
+      </div>
+      {% else %}
+      <div class="field full">
+        <label>指派工程师<span class="hint">指定该工单由哪位工程师负责处理</span></label>
+        <select name="assignee_id" required>
+          <option value="">请选择负责工程师</option>
+          {% set cur_g = '' %}
+          {% for e in engineers %}
+            {% if e.group_name != cur_g %}
+              {% if not loop.first %}</optgroup>{% endif %}
+              <optgroup label="{{ e.group_name }}">
+              {% set cur_g = e.group_name %}
+            {% endif %}
+            <option value="{{ e.id }}">{{ e.name }}</option>
+            {% if loop.last %}</optgroup>{% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn btn-primary" type="submit">提交工单</button>
+      <a href="{{ url_for('workorders') }}" class="btn btn-ghost">取消</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
